@@ -435,23 +435,35 @@ public class MemcachedConnection extends SpyThread implements ClusterConfigurati
    * the {@link DefaultConnectionFactory}.
    */
   protected void registerMetrics() {
-    if (metricType.equals(MetricType.DEBUG)
-      || metricType.equals(MetricType.PERFORMANCE)) {
-      metrics.addHistogram(OVERALL_AVG_BYTES_READ_METRIC);
-      metrics.addHistogram(OVERALL_AVG_BYTES_WRITE_METRIC);
-      metrics.addHistogram(OVERALL_AVG_TIME_ON_WIRE_METRIC);
-      metrics.addMeter(OVERALL_RESPONSE_METRIC);
-      metrics.addMeter(OVERALL_REQUEST_METRIC);
+    if (shouldRegisterMetrics()) {
+      registerCommonMetrics();
 
       if (metricType.equals(MetricType.DEBUG)) {
-        metrics.addCounter(RECON_QUEUE_METRIC);
-        metrics.addCounter(SHUTD_QUEUE_METRIC);
-        metrics.addMeter(OVERALL_RESPONSE_RETRY_METRIC);
-        metrics.addMeter(OVERALL_RESPONSE_SUCC_METRIC);
-        metrics.addMeter(OVERALL_RESPONSE_FAIL_METRIC);
+        registerDebugMetrics();
       }
     }
   }
+
+  private boolean shouldRegisterMetrics() {
+    return metricType.equals(MetricType.DEBUG) || metricType.equals(MetricType.PERFORMANCE);
+  }
+
+  private void registerCommonMetrics() {
+    metrics.addHistogram(OVERALL_AVG_BYTES_READ_METRIC);
+    metrics.addHistogram(OVERALL_AVG_BYTES_WRITE_METRIC);
+    metrics.addHistogram(OVERALL_AVG_TIME_ON_WIRE_METRIC);
+    metrics.addMeter(OVERALL_RESPONSE_METRIC);
+    metrics.addMeter(OVERALL_REQUEST_METRIC);
+  }
+
+  private void registerDebugMetrics() {
+    metrics.addCounter(RECON_QUEUE_METRIC);
+    metrics.addCounter(SHUTD_QUEUE_METRIC);
+    metrics.addMeter(OVERALL_RESPONSE_RETRY_METRIC);
+    metrics.addMeter(OVERALL_RESPONSE_SUCC_METRIC);
+    metrics.addMeter(OVERALL_RESPONSE_FAIL_METRIC);
+  }
+
 
   protected MemcachedNode createConnection(final NodeEndPoint endPoint) throws IOException {
     return createConnections(Collections.singletonList(endPoint)).get(0);
