@@ -42,39 +42,103 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-/**
- * A Spring {@link FactoryBean} creating {@link MemcachedClient} instances.
- * <p>
- * Usage example:
- *
- * <pre>
- * {@code
- * <bean id="memcachedClient"
- *     class="net.spy.memcached.utils.MemcachedClientFactoryBean">
- *   <property name="servers" value="${pajamas.remoteHosts}"/>
- *   <property name="protocol" value="${pajamas.client.protocol}"/>
- *   <property name="transcoder"/>
- *   <bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder"/>
- *   <property name="hashAlg" value="${pajamas.client.hashAlg}"/>
- *   <property name="locatorType" value="${pajamas.client.locatorType}"/>
- * }
- * </pre>
- * </p>
- *
- * @author Eran Harel
- */
-
 @SuppressWarnings("rawtypes")
-public class MemcachedClientFactoryBean implements FactoryBean,
+public class MemcachedClientFactoryBean implements FactoryBean<MemcachedClient>,
         InitializingBean, DisposableBean {
+
   private final ConnectionFactoryBuilder connectionFactoryBuilder =
-      new ConnectionFactoryBuilder();
+          new ConnectionFactoryBuilder();
+
   private String servers;
   private long shutdownTimeoutSeconds = 0;
   private MemcachedClient client;
 
+  // Setters for configuring ConnectionFactoryBuilder
+
+  public void setServers(String newServers) {
+    this.servers = newServers;
+  }
+
+  public void setAuthDescriptor(AuthDescriptor to) {
+    connectionFactoryBuilder.setAuthDescriptor(to);
+  }
+
+  public void setDaemon(boolean d) {
+    connectionFactoryBuilder.setDaemon(d);
+  }
+
+  public void setFailureMode(FailureMode fm) {
+    connectionFactoryBuilder.setFailureMode(fm);
+  }
+
+  public void setHashAlg(HashAlgorithm to) {
+    connectionFactoryBuilder.setHashAlg(to);
+  }
+
+  public void setInitialObservers(Collection<ConnectionObserver> obs) {
+    connectionFactoryBuilder.setInitialObservers(obs);
+  }
+
+  public void setLocatorType(Locator l) {
+    connectionFactoryBuilder.setLocatorType(l);
+  }
+
+  public void setMaxReconnectDelay(long to) {
+    connectionFactoryBuilder.setMaxReconnectDelay(to);
+  }
+
+  public void setOpFact(OperationFactory f) {
+    connectionFactoryBuilder.setOpFact(f);
+  }
+
+  public void setOpQueueFactory(OperationQueueFactory q) {
+    connectionFactoryBuilder.setOpQueueFactory(q);
+  }
+
+  public void setOpQueueMaxBlockTime(long t) {
+    connectionFactoryBuilder.setOpQueueMaxBlockTime(t);
+  }
+
+  public void setOpTimeout(long t) {
+    connectionFactoryBuilder.setOpTimeout(t);
+  }
+
+  public void setProtocol(Protocol prot) {
+    connectionFactoryBuilder.setProtocol(prot);
+  }
+
+  public void setReadBufferSize(int to) {
+    connectionFactoryBuilder.setReadBufferSize(to);
+  }
+
+  public void setReadOpQueueFactory(OperationQueueFactory q) {
+    connectionFactoryBuilder.setReadOpQueueFactory(q);
+  }
+
+  public void setShouldOptimize(boolean o) {
+    connectionFactoryBuilder.setShouldOptimize(o);
+  }
+
+  public void setTimeoutExceptionThreshold(int to) {
+    connectionFactoryBuilder.setTimeoutExceptionThreshold(to);
+  }
+
+  public void setTranscoder(Transcoder<Object> t) {
+    connectionFactoryBuilder.setTranscoder(t);
+  }
+
+  public void setUseNagleAlgorithm(boolean to) {
+    connectionFactoryBuilder.setUseNagleAlgorithm(to);
+  }
+
+  public void setWriteOpQueueFactory(OperationQueueFactory q) {
+    connectionFactoryBuilder.setWriteOpQueueFactory(q);
+  }
+
+  // Other methods
+
   @Override
-  public Object getObject() throws Exception {
+  public MemcachedClient getObject() throws Exception {
     return client;
   }
 
@@ -96,91 +160,11 @@ public class MemcachedClientFactoryBean implements FactoryBean,
 
   @Override
   public void destroy() throws Exception {
-    if(shutdownTimeoutSeconds > 0) {
+    if (shutdownTimeoutSeconds > 0) {
       client.shutdown(shutdownTimeoutSeconds, TimeUnit.SECONDS);
     } else {
       client.shutdown();
     }
-  }
-
-  public void setServers(final String newServers) {
-    this.servers = newServers;
-  }
-
-  public void setAuthDescriptor(final AuthDescriptor to) {
-    connectionFactoryBuilder.setAuthDescriptor(to);
-  }
-
-  public void setDaemon(final boolean d) {
-    connectionFactoryBuilder.setDaemon(d);
-  }
-
-  public void setFailureMode(final FailureMode fm) {
-    connectionFactoryBuilder.setFailureMode(fm);
-  }
-
-  public void setHashAlg(final HashAlgorithm to) {
-    connectionFactoryBuilder.setHashAlg(to);
-  }
-
-  public void setInitialObservers(final Collection<ConnectionObserver> obs) {
-    connectionFactoryBuilder.setInitialObservers(obs);
-  }
-
-  public void setLocatorType(final Locator l) {
-    connectionFactoryBuilder.setLocatorType(l);
-  }
-
-  public void setMaxReconnectDelay(final long to) {
-    connectionFactoryBuilder.setMaxReconnectDelay(to);
-  }
-
-  public void setOpFact(final OperationFactory f) {
-    connectionFactoryBuilder.setOpFact(f);
-  }
-
-  public void setOpQueueFactory(final OperationQueueFactory q) {
-    connectionFactoryBuilder.setOpQueueFactory(q);
-  }
-
-  public void setOpQueueMaxBlockTime(final long t) {
-    connectionFactoryBuilder.setOpQueueMaxBlockTime(t);
-  }
-
-  public void setOpTimeout(final long t) {
-    connectionFactoryBuilder.setOpTimeout(t);
-  }
-
-  public void setProtocol(final Protocol prot) {
-    connectionFactoryBuilder.setProtocol(prot);
-  }
-
-  public void setReadBufferSize(final int to) {
-    connectionFactoryBuilder.setReadBufferSize(to);
-  }
-
-  public void setReadOpQueueFactory(final OperationQueueFactory q) {
-    connectionFactoryBuilder.setReadOpQueueFactory(q);
-  }
-
-  public void setShouldOptimize(final boolean o) {
-    connectionFactoryBuilder.setShouldOptimize(o);
-  }
-
-  public void setTimeoutExceptionThreshold(final int to) {
-    connectionFactoryBuilder.setTimeoutExceptionThreshold(to);
-  }
-
-  public void setTranscoder(final Transcoder<Object> t) {
-    connectionFactoryBuilder.setTranscoder(t);
-  }
-
-  public void setUseNagleAlgorithm(final boolean to) {
-    connectionFactoryBuilder.setUseNagleAlgorithm(to);
-  }
-
-  public void setWriteOpQueueFactory(final OperationQueueFactory q) {
-    connectionFactoryBuilder.setWriteOpQueueFactory(q);
   }
 
   /**
